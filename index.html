@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎶 Vokabeltrainer Songs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .trainer {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+    .feedback {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    .radio-group {
+      margin-bottom: 1rem;
+    }
+    .solution {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+    }
+    .counter, .score {
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="trainer">
+    <h2>🎶 Vokabeltrainer: Songtexte</h2>
+
+    <div class="radio-group">
+      <label><input type="radio" name="direction" value="de-en" checked> Deutsch → Englisch</label><br />
+      <label><input type="radio" name="direction" value="en-de"> Englisch → Deutsch</label>
+    </div>
+
+    <button onclick="startTrainer()">Start</button>
+
+    <div class="counter" id="counter"></div>
+    <div class="score" id="score"></div>
+
+    <div id="word" style="font-size: 1.5rem; margin: 1rem 0;"></div>
+
+    <button id="solutionBtn" onclick="showSolution()" disabled>Lösung anzeigen</button>
+    <div class="solution" id="solution"></div>
+  </div>
+
+  <script>
+    const vocab = [
+      { de: "Lass es sein", en: "Let it be", yt: "https://www.youtube.com/watch?v=QDYfEBY9NM4" },
+      { de: "Sprich jetzt nicht", en: "Don’t speak now", yt: "https://www.youtube.com/watch?v=TR3Vdo5etCQ" },
+      { de: "Sag meinen Namen", en: "Say my name", yt: "https://www.youtube.com/watch?v=sQgd6MccwZc" },
+      { de: "Es ist mein Leben", en: "It's my life", yt: "https://www.youtube.com/watch?v=vx2u5uUu3DE" },
+      { de: "Öffne deine Augen", en: "Open your eyes", yt: "https://www.youtube.com/watch?v=Gfwk4OUT2HE" },
+      { de: "Beweg deine Füße", en: "Move your feet", yt: "https://www.youtube.com/watch?v=SPlQpGeTbIE" },
+      { de: "Spring jetzt herum", en: "Jump around now", yt: "https://www.youtube.com/watch?v=KZaz7OqyTHQ" },
+      { de: "Drück den Knopf", en: "Push the button", yt: "https://www.youtube.com/watch?v=rM4tT1bF4BA" },
+      { de: "Komm rüber", en: "Come on over", yt: "https://www.youtube.com/watch?v=4Rg3sAb8Id8" },
+      { de: "Halte meine Hand", en: "Hold my hand", yt: "https://www.youtube.com/watch?v=Fm5iP0S1z9w" },
+      { de: "Mädchen wie ich", en: "Girl like me", yt: "https://www.youtube.com/watch?v=vMLk_T0PPbk" },
+      { de: "Schüttle es ab", en: "Shake it off", yt: "https://www.youtube.com/watch?v=nfWlot6h_JM" },
+      { de: "Du brauchst Liebe", en: "You need love", yt: "https://www.youtube.com/watch?v=450p7goxZqg" },
+      { de: "Unter der Sonne", en: "Under the sun", yt: "https://www.youtube.com/watch?v=Il0S8BoucSA" },
+    ];
+
+    let remainingWords = [];
+    let currentWord = null;
+    let score = 0;
+
+    function getDirection() {
+      return document.querySelector('input[name="direction"]:checked').value;
+    }
+
+    function updateCounter() {
+      const total = vocab.length;
+      const done = total - remainingWords.length;
+      document.getElementById("counter").innerText = `Aufgabe ${done + 1} von ${total}`;
+    }
+
+    function updateScore() {
+      document.getElementById("score").innerText = `Gelöst: ${score}`;
+    }
+
+    function pickWord() {
+      if (remainingWords.length === 0) {
+        document.getElementById("word").innerText = "🎉 Ende! Alle Vokabeln wurden gezeigt.";
+        document.getElementById("solution").innerHTML = `Gesamt gelöst: ${score} von ${vocab.length}.`;
+        document.getElementById("solutionBtn").style.display = "none";
+        return;
+      }
+
+      const direction = getDirection();
+      const index = Math.floor(Math.random() * remainingWords.length);
+      currentWord = remainingWords.splice(index, 1)[0];
+
+      document.getElementById("solution").innerText = "";
+      document.getElementById("word").innerText =
+        direction === "de-en" ? currentWord.de : currentWord.en;
+
+      document.getElementById("solutionBtn").disabled = false;
+      updateCounter();
+      updateScore();
+    }
+
+    function showSolution() {
+      if (!currentWord) return;
+      const direction = getDirection();
+      const solutionText = direction === "de-en" ? currentWord.en : currentWord.de;
+      document.getElementById("solution").innerHTML = `Lösung: ${solutionText}<br><a href="${currentWord.yt}" target="_blank">🎬 YouTube ansehen</a>`;
+      score++;
+      document.getElementById("solutionBtn").disabled = true;
+      updateScore();
+      setTimeout(pickWord, 4000);
+    }
+
+    function startTrainer() {
+      remainingWords = [...vocab];
+      score = 0;
+      document.getElementById("solutionBtn").style.display = "inline-block";
+      document.getElementById("solution").innerText = "";
+      document.getElementById("word").innerText = "";
+      pickWord();
+    }
+
+    document.querySelectorAll('input[name="direction"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        startTrainer();
+      });
+    });
+  </script>
+</body>
+</html>
